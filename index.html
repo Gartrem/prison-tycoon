@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f09">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Тюрьма Тикоон</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{position:fixed;inset:0;margin:0;width:100%;height:100%;min-height:100svh;min-height:100dvh;background:#0b0f09;color:#b9cca1;font:12px/1.8 Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
+    body{display:flex;align-items:center;justify-content:center;container-type:size}
+    canvas{display:block;flex:none;min-width:0;min-height:0;width:min(100vw,75vh);height:auto;max-width:100%;max-height:100%;aspect-ratio:3/4;image-rendering:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
+    @supports(width:1cqw){canvas{width:min(100cqw,75cqh)}}
+    @media (pointer:coarse),(max-width:780px){canvas{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto}}
+    :fullscreen canvas{width:100vw;height:100vh;max-width:none;max-height:none;aspect-ratio:auto}
+    #loading{position:absolute;inset:0;z-index:2;display:grid;place-content:center;text-align:center;padding:30px;background:#10191e;color:#eee9d9;font:bold 22px Arial,sans-serif}
+    #loading[hidden]{display:none}
+  </style>
+</head>
+<body>
+  <canvas id="game" width="240" height="320" tabindex="0" aria-label="Тюрьма Тикоон"></canvas>
+  <div id="loading" role="alert" hidden></div>
+  <script type="module" src="./play.js?v=20260910-large-alerts-3"></script>
+</body>
+</html>
