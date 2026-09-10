@@ -66,8 +66,8 @@ async function start(){
   let prisonerArt=null;
   try{
     const [{createPrisonerTestArt},prisonerResponse]=await Promise.all([
-      import('./prisoner-test.js?v=20260910-1'),
-      fetch('./prisoner-test-hd.png.b64')
+      import('./prisoner-test.js?v=20260910-2'),
+      fetch('./prisoner-test-hd.png.b64?v=20260910-2')
     ]);
     if(!prisonerResponse.ok)throw new Error('Prisoner test atlas unavailable');
     const encoded=(await prisonerResponse.text()).trim();
