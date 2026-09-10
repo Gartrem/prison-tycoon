@@ -14,7 +14,7 @@ for(let i=0;i<10;i++){keyMap[`Digit${i}`]=48+i;keyMap[`Numpad${i}`]=48+i;}
 let runtime,ready=false,manuallyPaused=false;
 let fullscreenAttempted=false;
 function enterMobileFullscreen(){
-  if(window.PrisonAndroid)return; // Android owns the native immersive window.
+  if(window.PrisonAndroid)return;
   if(fullscreenAttempted||document.fullscreenElement||!matchMedia('(pointer:coarse)').matches)return;
   fullscreenAttempted=true;
   const target=document.documentElement;
@@ -63,9 +63,22 @@ async function start(){
   canvas.width=VIEW_WIDTH*resolution;canvas.height=VIEW_HEIGHT*resolution;
   let art=null;
   try{const response=await fetch('./guard-fsin-hd.png');if(!response.ok)throw new Error('Guard atlas unavailable');const sheet=await createImageBitmap(await response.blob());let radioSheet=null;try{const r=await fetch('./guard-radio-v2.png');if(r.ok)radioSheet=await createImageBitmap(await r.blob());}catch(error){console.warn('Radio frames unavailable:',error);}const [faces,radioFaces,panelImage,buttonsImage]=await Promise.all(['guard-face-adult.png','guard-radio-face-adult.png','major-chikin-panel-final.png','buttons-metal-reference.png'].map(async name=>{try{const r=await fetch('./'+name);return r.ok?await createImageBitmap(await r.blob()):null;}catch(error){console.warn('Face atlas unavailable:',error);return null;}}));art=createGuardArt(sheet,createCanvas,radioSheet,{faces,radioFaces,panelImage,buttonsImage});}catch(error){console.warn('Используется оригинальный охранник:',error);}
+  let prisonerArt=null;
+  try{
+    const [{createPrisonerTestArt},prisonerResponse]=await Promise.all([
+      import('./prisoner-test.js?v=20260910-1'),
+      fetch('./prisoner-test-hd.png.b64')
+    ]);
+    if(!prisonerResponse.ok)throw new Error('Prisoner test atlas unavailable');
+    const encoded=(await prisonerResponse.text()).trim();
+    const raw=atob(encoded),bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    prisonerArt=createPrisonerTestArt(await createImageBitmap(new Blob([bytes],{type:'image/png'})));
+  }catch(error){console.warn('Используются оригинальные заключённые:',error);}
   const [buttonTexture,approvedPlay]=await Promise.all(['button-metal-hd.png','button-play-approved.png'].map(async name=>{const r=await fetch('./'+name);if(!r.ok)throw new Error('Не загружено оформление кнопок');return createImageBitmap(await r.blob());}));
   const {createMetalButtons}=await import('./metal-buttons.js');
-  const drawButtons=createMetalButtons(createCanvas,null,buttonTexture,approvedPlay),characterArt=art;
+  const drawButtons=createMetalButtons(createCanvas,null,buttonTexture,approvedPlay),guardArt=art;
+  const characterArt={draw:(ctx,kind,args)=>prisonerArt?.draw(ctx,kind,args)||guardArt?.draw(ctx,kind,args)||false};
   const soundResponse=await fetch('./sound-metal-hd.png');
   if(!soundResponse.ok)throw new Error('Не загружен значок звука');
   const soundImage=await createImageBitmap(await soundResponse.blob());
@@ -85,7 +98,6 @@ async function start(){
     return kind==='button'?drawButtons(ctx,args):characterArt?.draw(ctx,kind,args)||false;
   }};
   runtime=createRenderer({createCanvas,screen:canvas,images,resources,storage:localStorage,audio,art,resolution,onFrame:()=>{
-    // Show the engine's original blue progress bar; the HTML panel is only for errors.
     if(!ready){ready=true;notify('prison-ready');canvas.focus({preventScroll:true});}
   },onSave:()=>notify('prison-saved'),onExit:()=>notify('prison-exit')});
   window.PrisonWeb=runtime;
